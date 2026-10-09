@@ -411,19 +411,3 @@
 .quotaWindowPercent {
   font-size: 14px;
 }
-
-.resetCount {
-  display: flex;
-  justify-content: flex-end;
-  align-items: baseline;
-  gap: 6px;
-  margin-bottom: 5px;
-  font-size: 12.5px;
-  color: var(--text-tertiary);
-
-  strong {
-    font-size: 14px;
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
-  }
-}
