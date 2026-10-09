@@ -1,6 +1,7 @@
-import { describe, expect, test } from 'bun:test';
+import { describe, expect, spyOn, test } from 'bun:test';
 import type { TFunction } from 'i18next';
-import { buildClaudeQuotaWindows } from '@/features/quota/providers/claude/data';
+import { buildClaudeQuotaWindows, CLAUDE_CONFIG } from '@/features/quota/providers/claude/data';
+import { apiCallApi } from '@/services/api';
 import type { ClaudeUsagePayload } from '@/types';
 import { formatQuotaResetTime } from '@/utils/quota';
 
@@ -273,4 +274,32 @@ describe('Claude Fable quota', () => {
       { id: 'seven-day', usedPercent: 20 },
     ]);
   });
+});
+
+test('Claude usage requests use the compatible User-Agent and still load the reported plan', async () => {
+  const request = spyOn(apiCallApi, 'request').mockImplementation(async (payload) => {
+    const isUsage = payload.url.endsWith('/usage');
+    const compatible = payload.header?.['User-Agent'] === 'claude-code/2.1.280';
+    const body = isUsage
+      ? compatible
+        ? { five_hour: { utilization: 20 } }
+        : { error: { message: 'Rate limited' } }
+      : { account: { has_claude_max: true } };
+    return {
+      statusCode: isUsage && !compatible ? 429 : 200,
+      header: {},
+      bodyText: JSON.stringify(body),
+      body,
+    };
+  });
+  try {
+    const quota = await CLAUDE_CONFIG.fetchQuota(
+      { name: 'claude.json', authIndex: 'test-index' },
+      t
+    );
+    expect(quota.windows[0].usedPercent).toBe(20);
+    expect(quota.planType).toBe('plan_max');
+  } finally {
+    request.mockRestore();
+  }
 });

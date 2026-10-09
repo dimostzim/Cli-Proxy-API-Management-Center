@@ -185,7 +185,7 @@ const fetchClaudeQuota = async (file: AuthFileItem, t: TFunction): Promise<Claud
       authIndex,
       method: 'GET',
       url: CLAUDE_USAGE_URL,
-      header: { ...CLAUDE_REQUEST_HEADERS },
+      header: { ...CLAUDE_REQUEST_HEADERS, 'User-Agent': 'claude-code/2.1.280' },
     }),
     apiCallApi.request({
       authIndex,
