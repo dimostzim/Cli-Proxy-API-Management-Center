@@ -70,7 +70,7 @@
 }
 
 .iconFallback {
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
   color: var(--text-secondary);
 }
@@ -78,7 +78,7 @@
 .fileName {
   min-width: 0;
   font-family: $font-mono;
-  font-size: 12.5px;
+  font-size: 14.5px;
   font-weight: 600;
   letter-spacing: 0.01em;
   color: var(--text-primary);
@@ -145,7 +145,7 @@
 
 .idleHint {
   font-family: $font-mono;
-  font-size: 11.5px;
+  font-size: 13px;
   line-height: 1.5;
   text-align: center;
 }
@@ -216,7 +216,7 @@
 /* ---------- error ---------- */
 
 .errorStrip {
-  font-size: 11.5px;
+  font-size: 13px;
   line-height: 1.5;
   color: var(--viz-failure);
   background: color-mix(in srgb, var(--viz-failure) 8%, transparent);
@@ -245,7 +245,7 @@
   border-radius: $radius-full;
   background: none;
   padding: 5px 11px;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.4;
   color: var(--text-secondary);
@@ -355,7 +355,7 @@
 .details {
   grid-column: 1 / -1;
   min-width: 0;
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--text-tertiary);
 
   > summary {
@@ -383,7 +383,7 @@
 
 .plainPlan {
   color: var(--text-tertiary);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
 }
 
@@ -393,7 +393,7 @@
 
 .quotaWindowMeta {
   font-family: inherit;
-  font-size: 11px;
+  font-size: 12.5px;
 }
 
 .actionPill {
@@ -402,4 +402,28 @@
   color: var(--text-tertiary);
   box-shadow: none;
   padding: 3px 0;
+}
+
+.quotaWindowLabel {
+  font-size: 13.5px;
+}
+
+.quotaWindowPercent {
+  font-size: 14px;
+}
+
+.resetCount {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 5px;
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+
+  strong {
+    font-size: 14px;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
 }

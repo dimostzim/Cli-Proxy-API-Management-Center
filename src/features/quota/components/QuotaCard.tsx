@@ -35,6 +35,8 @@ const quotaClasses = bindQuotaClasses(
     premiumPlanValue: styles.plainPlan,
     elitePlanValue: styles.plainPlan,
     codexPlanValue: styles.plainPlan,
+    quotaModel: `${bodyStyles.quotaModel} ${styles.quotaWindowLabel}`,
+    quotaPercent: `${bodyStyles.quotaPercent} ${styles.quotaWindowPercent}`,
     quotaRow: `${bodyStyles.quotaRow} ${styles.quotaWindow}`,
     quotaRowHeader: `${bodyStyles.quotaRowHeader} ${styles.quotaWindowHeader}`,
     quotaMeta: `${bodyStyles.quotaMeta} ${styles.quotaWindowMeta}`,
@@ -101,6 +103,14 @@ export function QuotaCard(props: QuotaCardProps) {
     quota,
     onRefresh
   );
+  const resetCount =
+    entry.type === 'claude'
+      ? claudeReset.count
+      : quota &&
+          'rateLimitResetCreditsAvailableCount' in quota &&
+          typeof quota.rateLimitResetCreditsAvailableCount === 'number'
+        ? quota.rateLimitResetCreditsAvailableCount
+        : null;
   const iconSrc = getAuthFileIcon(entry.type, resolvedTheme);
   const typeLabel = getTypeLabel(t, entry.type);
   const errorMessage = resolveQuotaErrorMessage(
@@ -205,6 +215,12 @@ export function QuotaCard(props: QuotaCardProps) {
       </div>
 
       <div className={styles.actions} role="cell">
+        {(entry.type === 'codex' || entry.type === 'claude') && (
+          <div className={styles.resetCount}>
+            <span>{t('claude_reset.remaining')}</span>
+            <strong>{resetCount ?? '--'}</strong>
+          </div>
+        )}
         {status !== 'idle' && (
           <footer className={styles.actionRow}>
             {entry.type === 'claude' && (
