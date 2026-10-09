@@ -1547,6 +1547,7 @@
     }
   },
   "quota_management": {
+    "account_details": "Все сведения о квоте",
     "search_label": "Поиск аккаунтов",
     "search_placeholder": "Поиск по имени файла или электронной почте",
     "search_empty_title": "Аккаунты не найдены",

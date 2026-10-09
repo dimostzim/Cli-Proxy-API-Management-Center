@@ -12,26 +12,34 @@ import { QuotaResetLabel } from '../../components/QuotaResetLabel';
 import { collectQuotaRowInstants, pickUrgentRowId } from '../../resetSchedule';
 import type { QuotaBodyProps } from '../../types';
 
-export function ClaudeQuotaBody({ quota, classes }: QuotaBodyProps<ClaudeQuotaState>) {
+export function ClaudeQuotaBody({
+  quota,
+  classes,
+  planLabel,
+  compact = false,
+}: QuotaBodyProps<ClaudeQuotaState>) {
   const { t, i18n } = useTranslation();
   const now = useNow();
   const soonestRowId = useMemo(
     () => pickUrgentRowId(collectQuotaRowInstants('claude', quota), now),
     [quota, now]
   );
-  const windows = quota.windows ?? [];
+  const allWindows = quota.windows ?? [];
+  const windows = compact ? allWindows.slice(0, 3) : allWindows;
   const extraUsage = quota.extraUsage ?? null;
   const planType = quota.planType ?? null;
 
   return (
     <>
-      {planType && (
+      {!compact && planType && (
         <div className={classes.codexPlan}>
           <span className={classes.codexPlanLabel}>{t('claude_quota.plan_label')}</span>
-          <span className={classes.codexPlanValue}>{t(`claude_quota.${planType}`)}</span>
+          <span className={classes.codexPlanValue}>
+            {planLabel || t(`claude_quota.${planType}`)}
+          </span>
         </div>
       )}
-      {extraUsage && extraUsage.is_enabled && (
+      {!compact && extraUsage && extraUsage.is_enabled && (
         <div className={classes.codexPlan}>
           <span className={classes.codexPlanLabel}>{t('claude_quota.extra_usage_label')}</span>
           <span className={classes.codexPlanValue}>
@@ -68,12 +76,17 @@ export function ClaudeQuotaBody({ quota, classes }: QuotaBodyProps<ClaudeQuotaSt
                 <span className={classes.quotaModel}>{windowLabel}</span>
                 <div className={classes.quotaMeta}>
                   <span className={classes.quotaPercent}>{percentLabel}</span>
-                  {resetDisplay && (
+                  {!compact && resetDisplay && (
                     <QuotaResetLabel display={resetDisplay} classes={classes} soon={soon} />
                   )}
                 </div>
               </div>
               <QuotaMeter percent={remaining} classes={classes} index={index} />
+              {compact && resetDisplay && (
+                <div className={classes.quotaMeta}>
+                  <QuotaResetLabel display={resetDisplay} classes={classes} soon={soon} />
+                </div>
+              )}
             </div>
           );
         })

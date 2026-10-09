@@ -251,3 +251,34 @@ describe('sortQuotaEntries', () => {
     expect(paginate(sorted, 1, 2).pageItems[0].file.name).toBe(last);
   });
 });
+
+describe('preferred account display order', () => {
+  test('orders accounts across providers without dropping new accounts or changing the input', () => {
+    const entries = classifyQuotaFiles(FILES);
+    const before = entries.map((entry) => entry.file.name);
+    const sorted = sortQuotaEntries(entries, 'default', () => null, [
+      'codex-b.json',
+      'claude-a.json',
+      'codex-a.json',
+    ]);
+    expect(sorted.map((entry) => entry.file.name)).toEqual([
+      'codex-b.json',
+      'claude-a.json',
+      'codex-a.json',
+      'grok-a.json',
+      'kimi-a.json',
+    ]);
+    expect(entries.map((entry) => entry.file.name)).toEqual(before);
+  });
+
+  test('recovery sorting takes precedence when explicitly selected', () => {
+    const entries = classifyQuotaFiles(FILES).filter((entry) => entry.type === 'codex');
+    const sorted = sortQuotaEntries(
+      entries,
+      'soonest',
+      (entry) => (entry.file.name === 'codex-a.json' ? 10 : 20),
+      ['codex-b.json', 'codex-a.json']
+    );
+    expect(sorted.map((entry) => entry.file.name)).toEqual(['codex-a.json', 'codex-b.json']);
+  });
+});

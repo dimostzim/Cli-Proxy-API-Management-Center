@@ -45,10 +45,14 @@ describe('Devin quota identity', () => {
 
   test('disambiguates displayed identities without using account secrets', () => {
     expect(getQuotaDisplayName({ ...devinFile('42'), email: 'demo@example.test' })).toBe(
-      'shared.json · demo@example.test'
+      'devin - demo@example.test'
     );
-    expect(getQuotaDisplayName({ ...devinFile('42'), account: 'secret' })).toBe('shared.json · 42');
-    expect(getQuotaDisplayName({ ...devinFile(null), account: 'secret' })).toBe('shared.json');
+    expect(getQuotaDisplayName({ ...devinFile('42'), account: 'secret' })).toBe(
+      'devin - shared.json · 42'
+    );
+    expect(getQuotaDisplayName({ ...devinFile(null), account: 'secret' })).toBe(
+      'devin - shared.json'
+    );
   });
 
   test('does not merge same-name Devin identities or leak quota and email between them', () => {
@@ -118,4 +122,20 @@ describe('Devin quota identity', () => {
     expect(useQuotaStore.getState().devinQuota[otherKey]).toBe(other);
     expect(useQuotaStore.getState().fileGenerations['shared.json']).toBe(1);
   });
+});
+
+test('labels Codex and Claude accounts using email while preserving cache identity', () => {
+  for (const provider of ['codex', 'claude']) {
+    const file = {
+      name: 'credential.json',
+      provider,
+      email: 'demo@example.test',
+      account: 'secret',
+    };
+    expect(getQuotaDisplayName(file)).toBe(`${provider} - demo@example.test`);
+    expect(getQuotaCacheKey(file)).toBe('credential.json');
+    expect(getQuotaDisplayName({ ...file, email: undefined })).toBe(
+      `${provider} - credential.json`
+    );
+  }
 });

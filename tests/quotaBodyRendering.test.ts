@@ -258,3 +258,51 @@ describe('ClaudeQuotaBody', () => {
     expect(markup).toMatch(/4 days/);
   });
 });
+
+test('Plus and Claude Max use plain labels and Claude accepts an explicit tier label', () => {
+  const plus = renderToStaticMarkup(
+    createElement(CodexQuotaBody, {
+      quota: { status: 'success', planType: 'plus', windows: [] },
+      classes,
+    })
+  );
+  expect(plus).toContain('<span class="codexPlanValue">Plus</span>');
+  const max = renderToStaticMarkup(
+    createElement(ClaudeQuotaBody, {
+      quota: { status: 'success', planType: 'plan_max', windows: [] },
+      classes,
+      planLabel: 'Max 100',
+    })
+  );
+  expect(max).toContain('<span class="codexPlanValue">Max 100</span>');
+  const unknownTier = renderToStaticMarkup(
+    createElement(ClaudeQuotaBody, {
+      quota: { status: 'success', planType: 'plan_max', windows: [] },
+      classes,
+    })
+  );
+  expect(unknownTier).toContain('<span class="codexPlanValue">Max</span>');
+});
+
+test('compact quota rows keep primary windows and retain extra windows in the details view', () => {
+  const quota: ClaudeQuotaState = {
+    status: 'success',
+    planType: 'plan_max',
+    windows: [
+      { id: 'five-hour', label: 'Five hour', usedPercent: 20, resetLabel: null },
+      { id: 'seven-day', label: 'Weekly', usedPercent: 30, resetLabel: null },
+      { id: 'seven-day-opus', label: 'Opus weekly', usedPercent: 40, resetLabel: null },
+      { id: 'other', label: 'Extra window', usedPercent: 40, resetLabel: null },
+    ],
+  };
+  const compact = renderToStaticMarkup(
+    createElement(ClaudeQuotaBody, { quota, classes, compact: true })
+  );
+  expect(compact).toContain('Five hour');
+  expect(compact).toContain('Weekly');
+  expect(compact).toContain('Opus weekly');
+  expect(compact).not.toContain('Extra window');
+  expect(compact).not.toContain('Max');
+  const details = renderToStaticMarkup(createElement(ClaudeQuotaBody, { quota, classes }));
+  expect(details).toContain('Extra window');
+});

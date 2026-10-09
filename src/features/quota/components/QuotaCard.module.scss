@@ -8,13 +8,15 @@
 
 .card {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-  padding: 15px 16px;
-  border-radius: 14px;
-  border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--bg-primary) 82%, transparent);
+  display: grid;
+  grid-template-columns: var(--quota-columns);
+  align-items: center;
+  gap: 20px;
+  padding: 14px 0;
+  border-radius: 0;
+  border: 0;
+  border-top: 1px solid var(--border-color);
+  background: transparent;
   transition:
     transform var(--dur-hover, 200ms) var(--ease-out-strong, ease-out),
     border-color var(--dur-hover, 200ms) var(--ease-out-strong, ease-out),
@@ -23,9 +25,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .card:hover {
-    transform: translateY(-2px);
-    border-color: var(--border-hover);
-    box-shadow: 0 12px 26px -14px rgb(0 0 0 / 0.16);
+    background: var(--bg-secondary);
   }
 }
 
@@ -88,9 +88,9 @@
 /* ---------- body 容器 ---------- */
 
 .body {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 20px;
   min-width: 0;
 }
 
@@ -98,12 +98,12 @@
 
 .idleBody {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 6px;
   width: 100%;
-  min-height: 76px;
+  min-height: 32px;
   padding: 12px 10px;
   cursor: pointer;
   border: 1px dashed var(--border-color);
@@ -307,4 +307,99 @@
   .spinning {
     animation: none;
   }
+}
+
+.actions {
+  min-width: 0;
+}
+
+@include mobile {
+  .card {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+
+  .body {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .actions {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+.fullWidth,
+.idleBody,
+.skeleton,
+.errorStrip {
+  grid-column: 1 / -1;
+}
+
+.quotaWindow {
+  padding: 2px 0;
+}
+
+.quotaWindowHeader {
+  flex-wrap: wrap;
+  gap: 3px 8px;
+}
+
+.quotaWindowMeta {
+  flex-wrap: wrap;
+  gap: 3px 7px;
+}
+
+.details {
+  grid-column: 1 / -1;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--text-tertiary);
+
+  > summary {
+    cursor: pointer;
+    width: fit-content;
+    padding: 2px 0;
+
+    &:focus-visible {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+  }
+
+  &[open] > summary {
+    margin-bottom: 8px;
+  }
+}
+
+.accountIdentity {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.plainPlan {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.iconWrap {
+  display: none;
+}
+
+.quotaWindowMeta {
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.actionPill {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-tertiary);
+  box-shadow: none;
+  padding: 3px 0;
 }

@@ -19,6 +19,7 @@ import {
   getTypeLabel,
   isThemeSurfaceIconProvider,
 } from '@/features/authFiles/constants';
+import { getCodexPlanLabel } from '../providers/codex/plan';
 import { bindQuotaClasses } from '../types';
 import { QUOTA_ADAPTERS, type QuotaCardState } from '../providers';
 import { isQuotaRefreshDisabled, type QuotaFileEntry } from '../logic';
@@ -28,10 +29,26 @@ import bodyStyles from './QuotaBody.module.scss';
 import styles from './QuotaCard.module.scss';
 
 /** 额度页全页外衣：QuotaBody 模块绑定成类型化契约（缺键在模块初始化即抛）。 */
-const quotaClasses = bindQuotaClasses(bodyStyles, 'QuotaBody.module.scss');
+const quotaClasses = bindQuotaClasses(
+  {
+    ...bodyStyles,
+    premiumPlanValue: styles.plainPlan,
+    elitePlanValue: styles.plainPlan,
+    codexPlanValue: styles.plainPlan,
+    quotaRow: `${bodyStyles.quotaRow} ${styles.quotaWindow}`,
+    quotaRowHeader: `${bodyStyles.quotaRowHeader} ${styles.quotaWindowHeader}`,
+    quotaMeta: `${bodyStyles.quotaMeta} ${styles.quotaWindowMeta}`,
+    codexPlan: `${bodyStyles.codexPlan} ${styles.fullWidth}`,
+    codexResetCredits: `${bodyStyles.codexResetCredits} ${styles.fullWidth}`,
+    codexResetCreditsError: `${bodyStyles.codexResetCreditsError} ${styles.fullWidth}`,
+    quotaMessage: `${bodyStyles.quotaMessage} ${styles.fullWidth}`,
+  },
+  'QuotaBody.module.scss'
+);
 
 export type QuotaCardProps = {
   entry: QuotaFileEntry;
+  planLabel?: string;
   quota?: QuotaCardState;
   resolvedTheme: ResolvedTheme;
   canRefresh: boolean;
@@ -45,6 +62,7 @@ export type QuotaCardProps = {
 export function QuotaCard(props: QuotaCardProps) {
   const {
     entry,
+    planLabel,
     quota,
     resolvedTheme,
     canRefresh,
@@ -66,6 +84,15 @@ export function QuotaCard(props: QuotaCardProps) {
       : ({ '--card-delay': `${mountEntranceDelayMs}ms` } as CSSProperties);
 
   const status = quota?.status ?? 'idle';
+  const planType =
+    quota && 'planType' in quota && typeof quota.planType === 'string' ? quota.planType : null;
+  const accountPlan =
+    planLabel ||
+    (entry.type === 'codex'
+      ? getCodexPlanLabel(t, planType)
+      : entry.type === 'claude' && planType
+        ? t(`claude_quota.${planType}`)
+        : planType);
   const loading = status === 'loading';
   const claudeReset = useClaudeResetGrants(
     file,
@@ -91,8 +118,9 @@ export function QuotaCard(props: QuotaCardProps) {
     <article
       className={`${styles.card} ${mountEntranceDelayMs === null ? '' : styles.cardEnter}`}
       style={entranceStyle}
+      role="row"
     >
-      <header className={styles.head}>
+      <header className={styles.head} role="rowheader">
         <span
           className={styles.iconWrap}
           title={typeLabel}
@@ -108,28 +136,15 @@ export function QuotaCard(props: QuotaCardProps) {
             <span className={styles.iconFallback}>{typeLabel.slice(0, 1).toUpperCase()}</span>
           )}
         </span>
-        <span className={styles.fileName} title={displayName}>
-          {displayName}
-        </span>
+        <div className={styles.accountIdentity}>
+          <span className={styles.fileName} title={displayName}>
+            {displayName}
+          </span>
+          {accountPlan && <span className={styles.plainPlan}>{accountPlan}</span>}
+        </div>
       </header>
 
-      <div className={styles.body}>
-        {entry.type === 'claude' && status === 'success' && (
-          <>
-            <div className={quotaClasses.codexPlan}>
-              <span className={quotaClasses.codexPlanItem}>
-                <span className={quotaClasses.codexPlanLabel}>{t('claude_reset.remaining')}</span>
-                <span className={quotaClasses.codexPlanValue}>{claudeReset.count ?? '--'}</span>
-              </span>
-            </div>
-            <ClaudeResetGrantDetails grants={claudeReset.grants} classes={quotaClasses} />
-            {claudeReset.message && (
-              <div role="status" className={quotaClasses.codexResetCreditsError}>
-                {t(`claude_reset.${claudeReset.message}`)}
-              </div>
-            )}
-          </>
-        )}
+      <div className={styles.body} role="cell">
         {status === 'idle' ? (
           <button
             type="button"
@@ -155,50 +170,83 @@ export function QuotaCard(props: QuotaCardProps) {
             {t(`${adapter.i18nPrefix}.load_failed`, { message: errorMessage })}
           </div>
         ) : quota ? (
-          <adapter.Body quota={quota} classes={quotaClasses} />
+          <>
+            <adapter.Body quota={quota} classes={quotaClasses} planLabel={planLabel} compact />
+            <details className={styles.details}>
+              <summary>{t('quota_management.account_details')}</summary>
+              <div className={styles.body}>
+                {entry.type === 'claude' && status === 'success' && (
+                  <>
+                    <div className={quotaClasses.codexPlan}>
+                      <span className={quotaClasses.codexPlanItem}>
+                        <span className={quotaClasses.codexPlanLabel}>
+                          {t('claude_reset.remaining')}
+                        </span>
+                        <span className={quotaClasses.codexPlanValue}>
+                          {claudeReset.count ?? '--'}
+                        </span>
+                      </span>
+                    </div>
+                    <ClaudeResetGrantDetails grants={claudeReset.grants} classes={quotaClasses} />
+                    {claudeReset.message && (
+                      <div role="status" className={quotaClasses.codexResetCreditsError}>
+                        {t(`claude_reset.${claudeReset.message}`)}
+                      </div>
+                    )}
+                  </>
+                )}
+                <adapter.Body quota={quota} classes={quotaClasses} planLabel={planLabel} />
+              </div>
+            </details>
+          </>
         ) : (
           <div className={styles.idleHint}>{t(`${adapter.i18nPrefix}.idle`)}</div>
         )}
       </div>
 
-      {status !== 'idle' && (
-        <footer className={styles.actionRow}>
-          {entry.type === 'claude' && (
+      <div className={styles.actions} role="cell">
+        {status !== 'idle' && (
+          <footer className={styles.actionRow}>
+            {entry.type === 'claude' && (
+              <button
+                type="button"
+                className={styles.actionPill}
+                disabled={claudeReset.blocked}
+                onClick={claudeReset.confirm}
+                title={t(`claude_reset.${claudeReset.buttonLabel}`)}
+              >
+                <IconRefreshCw
+                  size={13}
+                  className={claudeReset.busy ? styles.spinning : undefined}
+                />
+                {t(`claude_reset.${claudeReset.buttonLabel}`)}
+              </button>
+            )}
+            {showReset && (
+              <button
+                type="button"
+                className={styles.actionPill}
+                onClick={onReset}
+                disabled={!canRefresh || loading || resetting}
+                title={t('codex_quota.reset_button')}
+              >
+                <IconRefreshCw size={13} className={resetting ? styles.spinning : undefined} />
+                {t('codex_quota.reset_button')}
+              </button>
+            )}
             <button
               type="button"
               className={styles.actionPill}
-              disabled={claudeReset.blocked}
-              onClick={claudeReset.confirm}
-              title={t(`claude_reset.${claudeReset.buttonLabel}`)}
+              onClick={onRefresh}
+              disabled={isQuotaRefreshDisabled(canRefresh, loading, resetting || claudeReset.busy)}
+              title={t('auth_files.quota_refresh_hint')}
             >
-              <IconRefreshCw size={13} className={claudeReset.busy ? styles.spinning : undefined} />
-              {t(`claude_reset.${claudeReset.buttonLabel}`)}
+              <IconRefreshCw size={13} className={loading ? styles.spinning : undefined} />
+              {t('auth_files.quota_refresh_single')}
             </button>
-          )}
-          {showReset && (
-            <button
-              type="button"
-              className={styles.actionPill}
-              onClick={onReset}
-              disabled={!canRefresh || loading || resetting}
-              title={t('codex_quota.reset_button')}
-            >
-              <IconRefreshCw size={13} className={resetting ? styles.spinning : undefined} />
-              {t('codex_quota.reset_button')}
-            </button>
-          )}
-          <button
-            type="button"
-            className={styles.actionPill}
-            onClick={onRefresh}
-            disabled={isQuotaRefreshDisabled(canRefresh, loading, resetting || claudeReset.busy)}
-            title={t('auth_files.quota_refresh_hint')}
-          >
-            <IconRefreshCw size={13} className={loading ? styles.spinning : undefined} />
-            {t('auth_files.quota_refresh_single')}
-          </button>
-        </footer>
-      )}
+          </footer>
+        )}
+      </div>
     </article>
   );
 }

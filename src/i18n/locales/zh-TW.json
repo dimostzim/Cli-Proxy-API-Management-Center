@@ -1569,6 +1569,7 @@
     }
   },
   "quota_management": {
+    "account_details": "全部額度詳情",
     "search_label": "搜尋帳號",
     "search_placeholder": "依檔案名稱或電子郵件搜尋",
     "search_empty_title": "沒有符合的帳號",
