@@ -97,6 +97,9 @@ export function bindQuotaClasses(module: Record<string, string>, source: string)
 }
 
 export interface QuotaBodyProps<TState> {
+  /** Optional user-supplied tier label; does not change provider quota or billing. */
+  planLabel?: string;
+  compact?: boolean;
   quota: TState;
   classes: QuotaClassMap;
 }

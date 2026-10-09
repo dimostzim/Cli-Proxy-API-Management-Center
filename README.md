@@ -111,6 +111,34 @@ Use `bun run preview` to preview locally. Prefer an HTTP server over opening the
 
 </details>
 
+## Local quota table customization
+
+This fork displays quota credentials as compact account rows and labels them as
+`provider - email`, with a filename fallback when email is unavailable. Plans appear as plain text below the account name, with quota windows
+aligned horizontally and reset times below each bar.
+
+Default display ordering and optional plan labels are private browser preferences,
+scoped to the connected API base URL. They do not change request routing, account
+credentials, billing, or quota limits. Set these in your browser console, replacing
+the example filenames with the names returned by the credentials API:
+
+```js
+const apiBase = 'http://127.0.0.1:8317';
+localStorage.setItem(`quotaPage.accountOrder:${apiBase}`, JSON.stringify([
+  'first-account.json', 'second-account.json'
+]));
+localStorage.setItem(`quotaPage.planLabels:${apiBase}`, JSON.stringify({
+  'claude-account.json': 'Max 100'
+}));
+location.reload();
+```
+
+Unlisted accounts follow in their original order. The “Soonest recovery” sort
+still overrides the preferred default display order. Claude Max labels default to
+“Max” because the provider does not identify the 100/200 tier in its quota response.
+Preferences are stored separately in each browser; no personal account order is
+included in the repository.
+
 ## Development
 
 ```bash

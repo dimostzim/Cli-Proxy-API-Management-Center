@@ -54,3 +54,33 @@ export const writeQuotaUiState = (state: QuotaUiState) => {
     // ignore
   }
 };
+
+/** Account display order is private, persistent, and scoped to the connected server. */
+export const readQuotaAccountOrder = (apiBase: string): string[] => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const value: unknown = JSON.parse(
+      window.localStorage.getItem(`quotaPage.accountOrder:${apiBase}`) || '[]'
+    );
+    return Array.isArray(value)
+      ? value.filter((key): key is string => typeof key === 'string')
+      : [];
+  } catch {
+    return [];
+  }
+};
+
+export const readQuotaPlanLabels = (apiBase: string): Record<string, string> => {
+  if (typeof window === 'undefined') return {};
+  try {
+    const value: unknown = JSON.parse(
+      window.localStorage.getItem(`quotaPage.planLabels:${apiBase}`) || '{}'
+    );
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+    return Object.fromEntries(
+      Object.entries(value).filter(([, label]) => typeof label === 'string')
+    );
+  } catch {
+    return {};
+  }
+};

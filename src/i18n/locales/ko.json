@@ -1545,6 +1545,7 @@
     }
   },
   "quota_management": {
+    "account_details": "전체 할당량 세부 정보",
     "search_label": "계정 검색",
     "search_placeholder": "파일명 또는 이메일로 검색",
     "search_empty_title": "일치하는 계정 없음",

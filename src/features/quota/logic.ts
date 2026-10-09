@@ -4,6 +4,7 @@
  */
 
 import type { AuthFileItem } from '@/types';
+import { getQuotaCacheKey } from '@/utils/quota/identity';
 import { ANTIGRAVITY_CONFIG } from './providers/antigravity/data';
 import { CLAUDE_CONFIG } from './providers/claude/data';
 import { CODEX_CONFIG } from './providers/codex/data';
@@ -96,9 +97,20 @@ export function filterEntriesBySearch(entries: QuotaFileEntry[], search: string)
 export function sortQuotaEntries(
   entries: QuotaFileEntry[],
   mode: QuotaSortMode,
-  resolveNextRecoveryMs: (entry: QuotaFileEntry) => number | null
+  resolveNextRecoveryMs: (entry: QuotaFileEntry) => number | null,
+  accountOrder: readonly string[] = []
 ): QuotaFileEntry[] {
-  if (mode !== 'soonest') return [...entries];
+  if (mode !== 'soonest') {
+    const ranks = new Map(accountOrder.map((key, index) => [key, index]));
+    return entries
+      .map((entry, index) => ({ entry, index }))
+      .sort(
+        (a, b) =>
+          (ranks.get(getQuotaCacheKey(a.entry.file)) ?? Infinity) -
+            (ranks.get(getQuotaCacheKey(b.entry.file)) ?? Infinity) || a.index - b.index
+      )
+      .map(({ entry }) => entry);
+  }
 
   // Decorate once — resolving pokes at provider-shaped state per entry.
   return entries

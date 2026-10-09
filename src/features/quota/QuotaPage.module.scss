@@ -183,15 +183,20 @@
   overflow-wrap: anywhere;
 }
 
-/* ---------- 卡片网格 ----------
- * 列宽由 CSS 决定（不再用 JS 测量）：额度卡承载水位条，取 340px 下限，
- * 与认证文件页配额模式（.gridQuota）同一档。 */
-
+/* One credential per row, with a shared column layout for the header and rows. */
 .grid {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
-  align-items: stretch;
+  --quota-columns: minmax(240px, 1fr) minmax(0, 2.8fr) 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+@media (max-width: 1000px) {
+  .grid {
+    --quota-columns: minmax(160px, 0.8fr) minmax(0, 2fr) 110px;
+  }
 }
 
 /* ---------- 分页 ---------- */

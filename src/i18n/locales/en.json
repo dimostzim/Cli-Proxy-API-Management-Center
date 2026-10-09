@@ -1545,6 +1545,7 @@
     }
   },
   "quota_management": {
+    "account_details": "All quota details",
     "search_label": "Search accounts",
     "search_placeholder": "Search by filename or email",
     "search_empty_title": "No matching accounts",

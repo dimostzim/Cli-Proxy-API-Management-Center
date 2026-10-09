@@ -50,7 +50,12 @@ import type { QuotaProviderType } from './providers/types';
 import { useDevinQuotaAutoLoad } from './providers/devin/useDevinQuotaAutoLoad';
 import { useQuotaActions } from './hooks/useQuotaActions';
 import { useQuotaBatchLoader } from './hooks/useQuotaBatchLoader';
-import { readQuotaUiState, writeQuotaUiState } from './uiState';
+import {
+  readQuotaAccountOrder,
+  readQuotaPlanLabels,
+  readQuotaUiState,
+  writeQuotaUiState,
+} from './uiState';
 import styles from './QuotaPage.module.scss';
 
 const TAB_IDS: string[] = ['all', ...QUOTA_TAB_ORDER];
@@ -65,6 +70,9 @@ const displayNameFor = (name: string) => name;
 export function QuotaPage() {
   const { t } = useTranslation();
   const connectionStatus = useAuthStore((state) => state.connectionStatus);
+  const apiBase = useAuthStore((state) => state.apiBase);
+  const accountOrder = useMemo(() => readQuotaAccountOrder(apiBase), [apiBase]);
+  const planLabels = useMemo(() => readQuotaPlanLabels(apiBase), [apiBase]);
   const resolvedTheme: ResolvedTheme = useThemeStore((state) => state.resolvedTheme);
 
   const [files, setFiles] = useState<AuthFileItem[]>([]);
@@ -178,8 +186,8 @@ export function QuotaPage() {
   );
   // 排序在分页之前：否则「最快恢复」只在当前页内成立。
   const sortedEntries = useMemo(
-    () => sortQuotaEntries(filteredEntries, sortMode, resolveNextRecovery),
-    [filteredEntries, sortMode, resolveNextRecovery]
+    () => sortQuotaEntries(filteredEntries, sortMode, resolveNextRecovery, accountOrder),
+    [filteredEntries, sortMode, resolveNextRecovery, accountOrder]
   );
 
   const { pageItems, currentPage, totalPages } = useMemo(
@@ -382,7 +390,7 @@ export function QuotaPage() {
         {loading ? (
           <div className={styles.grid} aria-hidden="true">
             {Array.from({ length: SKELETON_CARD_COUNT }, (_, index) => (
-              <Skeleton key={index} height={168} rounded={14} />
+              <Skeleton key={index} height={72} rounded={0} />
             ))}
           </div>
         ) : isEmpty ? (
@@ -414,11 +422,12 @@ export function QuotaPage() {
             }
           />
         ) : (
-          <div className={styles.grid}>
+          <div className={styles.grid} role="table" aria-label={t('quota_management.title')}>
             {pageItems.map((entry, index) => (
               <QuotaCard
                 key={`${entry.type}:${getQuotaCacheKey(entry.file)}`}
                 entry={entry}
+                planLabel={planLabels[getQuotaCacheKey(entry.file)]}
                 quota={getQuota(entry)}
                 resolvedTheme={resolvedTheme}
                 canRefresh={canUseActions && !entry.file.disabled}
