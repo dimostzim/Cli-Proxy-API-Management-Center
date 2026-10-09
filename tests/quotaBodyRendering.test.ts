@@ -306,3 +306,26 @@ test('compact quota rows keep primary windows and retain extra windows in the de
   const details = renderToStaticMarkup(createElement(ClaudeQuotaBody, { quota, classes }));
   expect(details).toContain('Extra window');
 });
+
+test('compact Claude rows prioritize Fable weekly over cloud session credits', () => {
+  const quota: ClaudeQuotaState = {
+    status: 'success',
+    windows: [
+      { id: 'five-hour', label: 'Five hour', usedPercent: 0, resetLabel: '' },
+      { id: 'seven-day', label: 'Weekly', usedPercent: 10, resetLabel: '' },
+      { id: 'cloud-session-credits', label: 'Cloud credits', usedPercent: 20, resetLabel: '' },
+      { id: 'seven-day-fable', label: 'Fable weekly', usedPercent: 30, resetLabel: '' },
+    ],
+  };
+  const compact = renderToStaticMarkup(
+    createElement(ClaudeQuotaBody, { quota, classes, compact: true })
+  );
+  expect(compact).toContain('Fable weekly');
+  expect(compact).toContain('Five hour');
+  expect(compact).toContain('Weekly');
+  expect(compact).not.toContain('Cloud credits');
+  expect(compact.indexOf('Fable weekly')).toBeLessThan(compact.indexOf('Five hour'));
+  expect(compact.indexOf('Five hour')).toBeLessThan(compact.indexOf('Weekly'));
+  const details = renderToStaticMarkup(createElement(ClaudeQuotaBody, { quota, classes }));
+  expect(details).toContain('Cloud credits');
+});

@@ -25,7 +25,15 @@ export function ClaudeQuotaBody({
     [quota, now]
   );
   const allWindows = quota.windows ?? [];
-  const windows = compact ? allWindows.slice(0, 3) : allWindows;
+  const primaryWindowIds = ['seven-day-fable', 'five-hour', 'seven-day'];
+  const windows = compact
+    ? [
+        ...primaryWindowIds.flatMap((id) => allWindows.filter((window) => window.id === id)),
+        ...allWindows.filter(
+          (window) => !primaryWindowIds.includes(window.id) && window.id !== 'cloud-session-credits'
+        ),
+      ].slice(0, 3)
+    : allWindows;
   const extraUsage = quota.extraUsage ?? null;
   const planType = quota.planType ?? null;
 
