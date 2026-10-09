@@ -15,7 +15,6 @@ import type { QuotaBodyProps } from '../../types';
 export function ClaudeQuotaBody({
   quota,
   classes,
-  planLabel,
   compact = false,
 }: QuotaBodyProps<ClaudeQuotaState>) {
   const { t, i18n } = useTranslation();
@@ -42,9 +41,7 @@ export function ClaudeQuotaBody({
       {!compact && planType && (
         <div className={classes.codexPlan}>
           <span className={classes.codexPlanLabel}>{t('claude_quota.plan_label')}</span>
-          <span className={classes.codexPlanValue}>
-            {planLabel || t(`claude_quota.${planType}`)}
-          </span>
+          <span className={classes.codexPlanValue}>{t(`claude_quota.${planType}`)}</span>
         </div>
       )}
       {!compact && extraUsage && extraUsage.is_enabled && (

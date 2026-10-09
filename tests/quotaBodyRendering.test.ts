@@ -259,7 +259,7 @@ describe('ClaudeQuotaBody', () => {
   });
 });
 
-test('Plus and Claude Max use plain labels and Claude accepts an explicit tier label', () => {
+test('Plus and Claude Max use their reported plan labels', () => {
   const plus = renderToStaticMarkup(
     createElement(CodexQuotaBody, {
       quota: { status: 'success', planType: 'plus', windows: [] },
@@ -271,17 +271,10 @@ test('Plus and Claude Max use plain labels and Claude accepts an explicit tier l
     createElement(ClaudeQuotaBody, {
       quota: { status: 'success', planType: 'plan_max', windows: [] },
       classes,
-      planLabel: 'Max 100',
     })
   );
-  expect(max).toContain('<span class="codexPlanValue">Max 100</span>');
-  const unknownTier = renderToStaticMarkup(
-    createElement(ClaudeQuotaBody, {
-      quota: { status: 'success', planType: 'plan_max', windows: [] },
-      classes,
-    })
-  );
-  expect(unknownTier).toContain('<span class="codexPlanValue">Max</span>');
+  expect(max).toContain('<span class="codexPlanValue">Max</span>');
+  expect(max).not.toContain('Max 100');
 });
 
 test('compact quota rows keep primary windows and retain extra windows in the details view', () => {

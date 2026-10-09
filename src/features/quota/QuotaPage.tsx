@@ -50,12 +50,7 @@ import type { QuotaProviderType } from './providers/types';
 import { useDevinQuotaAutoLoad } from './providers/devin/useDevinQuotaAutoLoad';
 import { useQuotaActions } from './hooks/useQuotaActions';
 import { useQuotaBatchLoader } from './hooks/useQuotaBatchLoader';
-import {
-  readQuotaAccountOrder,
-  readQuotaPlanLabels,
-  readQuotaUiState,
-  writeQuotaUiState,
-} from './uiState';
+import { readQuotaAccountOrder, readQuotaUiState, writeQuotaUiState } from './uiState';
 import styles from './QuotaPage.module.scss';
 
 const TAB_IDS: string[] = ['all', ...QUOTA_TAB_ORDER];
@@ -72,7 +67,6 @@ export function QuotaPage() {
   const connectionStatus = useAuthStore((state) => state.connectionStatus);
   const apiBase = useAuthStore((state) => state.apiBase);
   const accountOrder = useMemo(() => readQuotaAccountOrder(apiBase), [apiBase]);
-  const planLabels = useMemo(() => readQuotaPlanLabels(apiBase), [apiBase]);
   const resolvedTheme: ResolvedTheme = useThemeStore((state) => state.resolvedTheme);
 
   const [files, setFiles] = useState<AuthFileItem[]>([]);
@@ -427,7 +421,6 @@ export function QuotaPage() {
               <QuotaCard
                 key={`${entry.type}:${getQuotaCacheKey(entry.file)}`}
                 entry={entry}
-                planLabel={planLabels[getQuotaCacheKey(entry.file)]}
                 quota={getQuota(entry)}
                 resolvedTheme={resolvedTheme}
                 canRefresh={canUseActions && !entry.file.disabled}

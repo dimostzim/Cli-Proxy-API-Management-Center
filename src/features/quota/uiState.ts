@@ -69,18 +69,3 @@ export const readQuotaAccountOrder = (apiBase: string): string[] => {
     return [];
   }
 };
-
-export const readQuotaPlanLabels = (apiBase: string): Record<string, string> => {
-  if (typeof window === 'undefined') return {};
-  try {
-    const value: unknown = JSON.parse(
-      window.localStorage.getItem(`quotaPage.planLabels:${apiBase}`) || '{}'
-    );
-    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
-    return Object.fromEntries(
-      Object.entries(value).filter(([, label]) => typeof label === 'string')
-    );
-  } catch {
-    return {};
-  }
-};

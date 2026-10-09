@@ -50,7 +50,6 @@ const quotaClasses = bindQuotaClasses(
 
 export type QuotaCardProps = {
   entry: QuotaFileEntry;
-  planLabel?: string;
   quota?: QuotaCardState;
   resolvedTheme: ResolvedTheme;
   canRefresh: boolean;
@@ -64,7 +63,6 @@ export type QuotaCardProps = {
 export function QuotaCard(props: QuotaCardProps) {
   const {
     entry,
-    planLabel,
     quota,
     resolvedTheme,
     canRefresh,
@@ -88,13 +86,13 @@ export function QuotaCard(props: QuotaCardProps) {
   const status = quota?.status ?? 'idle';
   const planType =
     quota && 'planType' in quota && typeof quota.planType === 'string' ? quota.planType : null;
-  const accountPlan =
-    planLabel ||
-    (entry.type === 'codex'
+  const accountPlan = planType
+    ? entry.type === 'codex'
       ? getCodexPlanLabel(t, planType)
-      : entry.type === 'claude' && planType
+      : entry.type === 'claude'
         ? t(`claude_quota.${planType}`)
-        : planType);
+        : planType
+    : null;
   const loading = status === 'loading';
   const claudeReset = useClaudeResetGrants(
     file,
@@ -173,7 +171,7 @@ export function QuotaCard(props: QuotaCardProps) {
           </div>
         ) : quota ? (
           <>
-            <adapter.Body quota={quota} classes={quotaClasses} planLabel={planLabel} compact />
+            <adapter.Body quota={quota} classes={quotaClasses} compact />
             <details className={styles.details}>
               <summary>{t('quota_management.account_details')}</summary>
               <div className={styles.body}>
@@ -197,7 +195,7 @@ export function QuotaCard(props: QuotaCardProps) {
                     )}
                   </>
                 )}
-                <adapter.Body quota={quota} classes={quotaClasses} planLabel={planLabel} />
+                <adapter.Body quota={quota} classes={quotaClasses} />
               </div>
             </details>
           </>
